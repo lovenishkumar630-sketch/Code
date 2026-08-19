@@ -654,19 +654,23 @@ textarea{min-height:90px;resize:vertical;}
     if(dotnav)dotnav.classList.toggle('show',p>0.9);
   }
   var opened=false;
+  function onClickOpen(){openEnv();}
+  function onTouchOpen(e){if(opened)return;e.preventDefault();openEnv();}
+  function onKeyOpen(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();openEnv();}}
   function openEnv(){
     if(opened)return;opened=true;
     var start=performance.now(),dur=1300;
-    function step(now){var t=clamp((now-start)/dur,0,1);render(t);if(t<1)requestAnimationFrame(step);else{document.body.classList.remove('locked');}}
+    function step(now){var t=clamp((now-start)/dur,0,1);render(t);if(t<1)requestAnimationFrame(step);
+      else{document.body.classList.remove('locked');if(gate){gate.removeEventListener('click',onClickOpen);gate.removeEventListener('touchstart',onTouchOpen);gate.removeEventListener('keydown',onKeyOpen);gate.style.cursor='default';gate.removeAttribute('role');gate.removeAttribute('tabindex');}}}
     requestAnimationFrame(step);
   }
   render(0);
   if(reduce){render(1);document.body.classList.remove('locked');}
   else if(gate){
     gate.setAttribute('role','button');gate.setAttribute('tabindex','0');
-    gate.addEventListener('click',openEnv);
-    gate.addEventListener('touchstart',function(e){e.preventDefault();openEnv();},{passive:false});
-    gate.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();openEnv();}});
+    gate.addEventListener('click',onClickOpen);
+    gate.addEventListener('touchstart',onTouchOpen,{passive:false});
+    gate.addEventListener('keydown',onKeyOpen);
   }
 
   var target=new Date('2026-11-01T11:00:00+05:30').getTime();
